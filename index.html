@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>RK Garage Calculator</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  font-family:'Poppins',sans-serif;
+  background:
+    radial-gradient(circle at top,#2b1055 0%,#12091f 40%,#09090d 100%);
+  color:white;
+  min-height:100vh;
+  padding:25px;
+}
+
+/* CONTAINER */
+
+.container{
+  max-width:950px;
+  margin:auto;
+}
+
+/* HEADER */
+
+.header{
+  text-align:center;
+  margin-bottom:35px;
+}
+
+.header h1{
+  font-size:42px;
+  font-weight:700;
+  color:#e9d5ff;
+  text-shadow:0 0 25px rgba(168,85,247,.7);
+}
+
+.header p{
+  color:#b3b3b3;
+  margin-top:8px;
+  font-size:15px;
+}
+
+/* GRID */
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+  gap:20px;
+}
+
+/* SECTION */
+
+.section{
+  background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:22px;
+  overflow:hidden;
+  backdrop-filter:blur(14px);
+  box-shadow:0 10px 35px rgba(0,0,0,.35);
+  transition:.25s;
+}
+
+.section:hover{
+  transform:translateY(-3px);
+  box-shadow:0 15px 45px rgba(168,85,247,.18);
+}
+
+.section h3{
+  padding:18px 20px;
+  font-size:17px;
+  color:#f3e8ff;
+  background:linear-gradient(
+    90deg,
+    rgba(168,85,247,.35),
+    transparent
+  );
+  border-bottom:1px solid rgba(255,255,255,.05);
+}
+
+/* ITEM */
+
+.item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:14px 18px;
+  border-bottom:1px solid rgba(255,255,255,.05);
+  transition:.2s;
+  cursor:pointer;
+}
+
+.item:last-child{
+  border-bottom:none;
+}
+
+.item:hover{
+  background:rgba(168,85,247,.08);
+}
+
+.left{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+input[type="checkbox"]{
+  width:18px;
+  height:18px;
+  accent-color:#a855f7;
+  cursor:pointer;
+}
+
+.name{
+  font-size:14px;
+  font-weight:500;
+}
+
+.price{
+  color:#d8b4fe;
+  font-weight:600;
+  font-size:14px;
+}
+
+/* TOTAL */
+
+.total-box{
+  position:sticky;
+  bottom:15px;
+  margin-top:30px;
+
+  background:rgba(17,17,24,.9);
+  border:1px solid rgba(255,255,255,.08);
+
+  backdrop-filter:blur(15px);
+
+  border-radius:24px;
+
+  padding:25px;
+
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+
+  box-shadow:0 15px 45px rgba(0,0,0,.45);
+}
+
+.total-info{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+}
+
+.label{
+  color:#aaa;
+  font-size:14px;
+}
+
+#count{
+  color:#ccc;
+  font-size:14px;
+}
+
+.total{
+  font-size:40px;
+  font-weight:700;
+  color:#f3e8ff;
+  text-shadow:0 0 20px rgba(192,132,252,.7);
+}
+
+/* BUTTON */
+
+button{
+  border:none;
+  padding:14px 22px;
+  border-radius:15px;
+
+  background:linear-gradient(
+    135deg,
+    #9333ea,
+    #c084fc
+  );
+
+  color:white;
+  font-weight:600;
+  font-size:15px;
+
+  cursor:pointer;
+  transition:.25s;
+
+  box-shadow:0 10px 25px rgba(168,85,247,.35);
+}
+
+button:hover{
+  transform:translateY(-2px) scale(1.03);
+  box-shadow:0 15px 30px rgba(168,85,247,.45);
+}
+
+/* MOBILE */
+
+@media(max-width:700px){
+
+  .header h1{
+    font-size:30px;
+  }
+
+  .grid{
+    grid-template-columns:1fr;
+  }
+
+  .total-box{
+    flex-direction:column;
+    gap:20px;
+    text-align:center;
+  }
+
+  button{
+    width:100%;
+  }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <h1>RK Garage Calculator</h1>
+    <p>Pilih modifikasi kendaraan dan hitung total biaya secara otomatis</p>
+  </div>
+
+  <div class="grid" id="list"></div>
+
+  <div class="total-box">
+
+    <div class="total-info">
+
+      <div class="label">
+        TOTAL BIAYA
+      </div>
+
+      <div id="count">
+        0 item dipilih
+      </div>
+
+      <div class="total" id="total">
+        $0
+      </div>
+
+    </div>
+
+    <button onclick="resetAll()">
+      Reset Semua
+    </button>
+
+  </div>
+
+</div>
+
+<script>
+
+const data = {
+
+  "PAINT": [
+    ["PRIMARY",20000],
+    ["SECONDARY",20000],
+    ["PEARLESCENT",15000],
+    ["INTERIOR",15000],
+    ["DASHBOARD",15000]
+  ],
+
+  "APPEARANCE": [
+    ["SPOILER",25000],
+    ["FRONT BUMPER",25000],
+    ["REAR BUMPER",25000],
+    ["ROOF",25000],
+    ["SIDE SKIRT",20000],
+    ["EXHAUST",15000],
+    ["FRAME (ROLLCAGE)",15000]
+  ],
+
+  "WINDOW TINT": [
+    ["0%",2000],
+    ["10%",5000],
+    ["50%",7000],
+    ["100%",30000]
+  ],
+
+  "PERFORMANCE": [
+    ["ENGINE (CAR)",150000],
+    ["ENGINE (BIKE)",120000],
+    ["BRAKES",100000],
+    ["TRANSMISSION",140000],
+    ["TURBO",110000]
+  ],
+
+  "SUSPENSION": [
+    ["LOWERED",15000],
+    ["SPORTS",35000],
+    ["COMPETITION",60000]
+  ]
+
+};
+
+function render(){
+
+  const list = document.getElementById("list");
+
+  Object.keys(data).forEach(section => {
+
+    let html = `
+      <div class="section">
+        <h3>${section}</h3>
+    `;
+
+    data[section].forEach(item => {
+
+      html += `
+
+      <label class="item">
+
+        <div class="left">
+
+          <input
+            type="checkbox"
+            value="${item[1]}"
+            onchange="calc()"
+          >
+
+          <span class="name">
+            ${item[0]}
+          </span>
+
+        </div>
+
+        <span class="price">
+          $${item[1].toLocaleString()}
+        </span>
+
+      </label>
+
+      `;
+
+    });
+
+    html += `</div>`;
+
+    list.innerHTML += html;
+
+  });
+
+}
+
+function calc(){
+
+  let total = 0;
+  let count = 0;
+
+  document
+    .querySelectorAll('input[type="checkbox"]')
+    .forEach(cb => {
+
+      if(cb.checked){
+        total += Number(cb.value);
+        count++;
+      }
+
+    });
+
+  document.getElementById("total").innerText =
+    "$" + total.toLocaleString();
+
+  document.getElementById("count").innerText =
+    count + " item dipilih";
+
+}
+
+function resetAll(){
+
+  document
+    .querySelectorAll('input[type="checkbox"]')
+    .forEach(cb => cb.checked = false);
+
+  calc();
+
+}
+
+render();
+
+</script>
+
+</body>
+</html>
